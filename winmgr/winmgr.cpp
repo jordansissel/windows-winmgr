@@ -1,41 +1,61 @@
-// winmgr.cpp : Defines the entry point for the application.
-//
+// winmgr.cpp : main project file.
 
 #include "stdafx.h"
-#include "winmgr.h"
+#include "Form1.h"
+#include "WindowItem.h"
+#include <stdio.h> /* for snprintf */
+#using <mscorlib.dll>
 
-#define MAX_LOADSTRING 100
+using namespace winmgr;
+using namespace System;
+using namespace System::Collections;
+using namespace System::Runtime::InteropServices;
 
-// Global Variables:
-HINSTANCE hInst;                // current instance
-TCHAR szTitle[MAX_LOADSTRING];          // The title bar text
-TCHAR szWindowClass[MAX_LOADSTRING];      // the main window class name
+// A delegate type.
+delegate BOOL CallBack(HWND hwnd, LPARAM lparam);
 
-BOOL CALLBACK winproc(HWND window, LPARAM lParam);
+//[DllImport("user32")]
 
-int APIENTRY _tWinMain(HINSTANCE hInstance,
-                       HINSTANCE hPrevInstance,
-                       LPTSTR    lpCmdLine,
-                       int       nCmdShow)
-{
-  UNREFERENCED_PARAMETER(hPrevInstance);
-  UNREFERENCED_PARAMETER(lpCmdLine);
+ref class MyTest {
+public:
+  ArrayList ^windows;
 
-  // Initialize global strings
-  LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-  LoadString(hInstance, IDC_WINMGR, szWindowClass, MAX_LOADSTRING);
+  MyTest() {
+	  windows = gcnew ArrayList();
+  }
 
-  EnumWindows((WNDENUMPROC) winproc, 0);
-  return 0;
-}
-
-BOOL CALLBACK winproc(HWND hwnd, LPARAM lParam) {
-  LPWSTR title;
-  int len = 1024;
-
-  title = (LPWSTR)GlobalAlloc(0, len);
-  GetWindowText(hwnd, title, len);
-  OutputDebugString(title);
-  OutputDebugStringA("\n");
+  BOOL proc(HWND hwnd, LPARAM lparam) {
+    wchar_t data[200];
+	WindowItem ^wi = gcnew WindowItem();
+	wi->hwnd = hwnd;
+	GetWindowText(hwnd, data, 200);
+	wi->title = gcnew String(data);
+	this->windows->Add(wi);
   return TRUE;
+  }
+};
+
+[STAThreadAttribute]
+int main(array<System::String ^> ^args)
+{
+	ArrayList ^foo;
+	// Enabling Windows XP visual effects before any controls are created
+	Application::EnableVisualStyles();
+	Application::SetCompatibleTextRenderingDefault(false); 
+
+	//f->dataGridView1->DataSource = foo;
+
+  OutputDebugStringA("Hello\n");
+  MyTest ^mt = gcnew MyTest();
+  CallBack ^cb = gcnew CallBack(mt, &MyTest::proc);
+  pin_ptr<CallBack^> pinner = &cb;
+  IntPtr cbptr = Marshal::GetFunctionPointerForDelegate(cb);
+  WNDENUMPROC enumproc = static_cast<WNDENUMPROC>(cbptr.ToPointer());
+  EnumWindows(enumproc, 0);
+
+	Form1 ^f = gcnew Form1(mt->windows);
+	Application::Run(f);
+
+	return 0;
 }
+
