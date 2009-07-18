@@ -14,36 +14,38 @@ using namespace System::Runtime::InteropServices;
 // A delegate type.
 delegate BOOL CallBack(HWND hwnd, LPARAM lparam);
 
-//[DllImport("user32")]
 
 ref class MyTest {
-public:
-  ArrayList ^windows;
+  public:
+    ArrayList ^windows;
 
-  MyTest() {
-	  windows = gcnew ArrayList();
-  }
+    MyTest() {
+      windows = gcnew ArrayList();
+    }
 
-  BOOL proc(HWND hwnd, LPARAM lparam) {
-    wchar_t data[200];
-	WindowItem ^wi = gcnew WindowItem();
-	wi->hwnd = hwnd;
-	GetWindowText(hwnd, data, 200);
-	wi->title = gcnew String(data);
-	this->windows->Add(wi);
-  return TRUE;
-  }
+    BOOL proc(HWND hwnd, LPARAM lparam) {
+      wchar_t data[200];
+      WindowItem ^wi = gcnew WindowItem();
+      wi->hwnd = hwnd;
+      GetWindowText(hwnd, data, 200);
+
+      if (data[0] != NULL) {
+        wi->title = gcnew String(data);
+        this->windows->Add(wi);
+      }
+      return TRUE;
+    }
 };
 
 [STAThreadAttribute]
 int main(array<System::String ^> ^args)
 {
-	ArrayList ^foo;
-	// Enabling Windows XP visual effects before any controls are created
-	Application::EnableVisualStyles();
-	Application::SetCompatibleTextRenderingDefault(false); 
+  ArrayList ^foo;
+  // Enabling Windows XP visual effects before any controls are created
+  Application::EnableVisualStyles();
+  Application::SetCompatibleTextRenderingDefault(false); 
 
-	//f->dataGridView1->DataSource = foo;
+  //f->dataGridView1->DataSource = foo;
 
   OutputDebugStringA("Hello\n");
   MyTest ^mt = gcnew MyTest();
@@ -53,9 +55,9 @@ int main(array<System::String ^> ^args)
   WNDENUMPROC enumproc = static_cast<WNDENUMPROC>(cbptr.ToPointer());
   EnumWindows(enumproc, 0);
 
-	Form1 ^f = gcnew Form1(mt->windows);
-	Application::Run(f);
+  Form1 ^f = gcnew Form1(mt->windows);
+  Application::Run(f);
 
-	return 0;
+  return 0;
 }
 
