@@ -15,6 +15,7 @@ namespace winmgr {
       HWND hwnd;
 
       WindowItem(HWND hwnd);
-	  bool matches(WMQuery ^query);
+      bool matches(WMQuery ^query);
+      void activate();
   };
 }

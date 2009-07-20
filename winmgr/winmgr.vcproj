@@ -297,6 +297,7 @@
 			</File>
 			<File
 				RelativePath=".\main.xaml"
+				DeploymentContent="true"
 				>
 			</File>
 		</Filter>

@@ -4,6 +4,7 @@
 #include "WindowItem.h"
 #include "WindowLister.h"
 #include "WindowSearcher.h"
+#include "resource.h"
 #include <stdio.h> /* for snprintf */
 #using <mscorlib.dll>
 
@@ -15,20 +16,28 @@ using namespace System::Windows;
 using namespace System::Windows::Controls;
 using namespace System::Windows::Input;
 using namespace System;
+using namespace System::Xml;
+using namespace System::Resources;
+using namespace System::Reflection;
 using namespace System::Text::RegularExpressions;
 using namespace winmgr;
+
+ref class Test {
+public:
+  property String ^title;
+};
 
 ref class WindowManager {
   public:
     WindowSearcher ^wsearch;
     WindowManager() {
-		this->wsearch = gcnew winmgr::WindowSearcher();
+      this->wsearch = gcnew winmgr::WindowSearcher();
     }
 
-    Window ^WindowFromXaml(String ^filename) {
-      Stream ^st = File::OpenRead(filename);
-      Window ^window = (Window ^)XamlReader::Load(st);
-      st->Close();
+    Window ^WindowFromXaml(String ^xaml) {
+      XmlTextReader ^input = gcnew XmlTextReader(gcnew StringReader(xaml));
+      Window ^window = (Window ^)XamlReader::Load(input);
+      input->Close();
       return window;
     }
 
@@ -40,7 +49,6 @@ ref class WindowManager {
 
       ItemsControl ^l = (ItemsControl ^)main->FindName("results");
       l->ItemsSource = this->wsearch->windows;
-
       ((TextBox ^)main->FindName("userinput"))->Focus();
     }
 
@@ -53,18 +61,31 @@ ref class WindowManager {
       l->ItemsSource = this->wsearch->filter(input->Text);
     }
 
+    void onkeypress(Object ^sender, KeyEventArgs ^ev) {
+      if (ev->Key == Key::Return) {
+        TextBox ^input = (TextBox ^)sender;
+        ArrayList ^windows = this->wsearch->filter(input->Text);
+        //Activate the window of the first item in the list
+		if (windows->Count > 0) {
+          ((WindowItem ^)windows[0])->activate();
+		}
+
+      }
+    }
+
     int start() {
       Window ^main;
-
-      main = WindowFromXaml("main.xaml");
+      main = WindowFromXaml(MAIN_XAML);
       main->Height = 400;
       main->Width = 600;
       main->Title = "Testing XAML";
 
-	  main->Loaded += gcnew RoutedEventHandler(this, &WindowManager::onloaded);
+      main->Loaded += gcnew RoutedEventHandler(this, &WindowManager::onloaded);
 
-	  TextBox ^input = (TextBox ^)main->FindName("userinput");
+      TextBox ^input = (TextBox ^)main->FindName("userinput");
       input->TextChanged += gcnew TextChangedEventHandler(this, &WindowManager::ontextinput);
+
+      input->KeyDown += gcnew KeyEventHandler(this, &WindowManager::onkeypress);
 
       return (gcnew Application())->Run(main);
     }
@@ -74,5 +95,3 @@ ref class WindowManager {
 int main(array<System::String ^> ^args) {
   return (gcnew WindowManager())->start();
 }
-
-
