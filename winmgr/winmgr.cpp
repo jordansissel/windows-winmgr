@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "WindowItem.h"
 #include "WindowLister.h"
+#include "WindowSearcher.h"
 #include <stdio.h> /* for snprintf */
 #using <mscorlib.dll>
 
@@ -16,49 +17,61 @@ using namespace System::Windows::Input;
 using namespace System;
 using namespace winmgr;
 
-Window ^WindowFromXaml(String ^filename) {
-  Stream ^st = File::OpenRead(filename);
-  Window ^window = (Window ^)XamlReader::Load(st);
-  st->Close();
-  return window;
-}
+ref class WindowManager {
+  public:
+    WindowSearcher ^wsearch;
+    WindowManager() {
+		this->wsearch = gcnew winmgr::WindowSearcher();
+    }
 
-void onkeypress(Object ^sender, RoutedEventArgs ^ev) {
-  Window ^main = Application::Current->MainWindow;
-  TextBox ^t = (TextBox ^)main->FindName("mTextBox");
-  main->Title = t->Text;
+    Window ^WindowFromXaml(String ^filename) {
+      Stream ^st = File::OpenRead(filename);
+      Window ^window = (Window ^)XamlReader::Load(st);
+      st->Close();
+      return window;
+    }
 
-}
+    static void onloaded(Object ^sender, RoutedEventArgs ^ev) {
+      Window ^main = Application::Current->MainWindow;
+      main->Title = "Hello there";
 
-void onloaded(Object ^sender, RoutedEventArgs ^ev) {
-  Window ^main = Application::Current->MainWindow;
-  main->Title = "Hello there";
+      this->wsearch->start();
 
-  ArrayList ^foo;
-  WindowLister ^wl = gcnew WindowLister();
-  foo = wl->GetWindows();
-  ListBox ^l = (ListBox ^)main->FindName("results");
-  l->ItemsSource = foo;
-  l->DisplayMemberPath = "title";
-}
+      ItemsControl ^l = (ItemsControl ^)main->FindName("results");
+      l->ItemsSource = this->wsearch->windows;
+
+      ((TextBox ^)main->FindName("userinput"))->Focus();
+    }
+
+    static void ontextinput(Object ^sender, TextChangedEventArgs ^ev) {
+      TextBox ^input = (TextBox ^)sender;
+      Window ^main = Application::Current->MainWindow;
+      main->Title = input->Text;
+
+    }
+
+    int start() {
+      Window ^main;
+
+      main = WindowFromXaml("main.xaml");
+      main->Height = 400;
+      main->Width = 600;
+      main->Title = "Testing XAML";
+
+	  /* I want to have the 'loaded' event call this->onloaded(...) */
+      main->Loaded += gcnew RoutedEventHandler( /* ???? */);
+
+      TextBox ^input = (TextBox ^)main->FindName("userinput");
+	  /* Same here, I want to call this->ontextinput */
+      input->TextChanged += gcnew TextChangedEventHandler(&WindowManager::ontextinput);
+
+      return (gcnew Application())->Run(main);
+    }
+};
 
 [STAThreadAttribute]
-int main(array<System::String ^> ^args)
-{
-
-  Window ^main;
-
-  main = WindowFromXaml("main.xaml");
-  main->Height = 400;
-  main->Width = 600;
-  main->Title = "Testing XAML";
-  main->Loaded += gcnew RoutedEventHandler(&onloaded);
-
-  //TextBox ^t = (TextBox ^)main->FindName("mTextBox");
-  //t->KeyDown += gcnew KeyEventHandler(&onkeypress);
-  //t->TextInput += &onkeypress;
-
-  return (gcnew Application())->Run(main);
+int main(array<System::String ^> ^args) {
+  return (gcnew WindowManager())->start();
 }
 
 

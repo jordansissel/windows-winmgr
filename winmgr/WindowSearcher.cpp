@@ -1,0 +1,33 @@
+#include "stdafx.h"
+#include "WindowSearcher.h"
+#include "WindowLister.h"
+#include "WindowItem.h"
+
+
+namespace winmgr {
+  WindowSearcher::WindowSearcher() {
+    this->windows = gcnew ArrayList();
+  }
+
+  void WindowSearcher::start() { 
+    WindowLister ^lister = gcnew WindowLister();
+    this->windows = lister->GetWindows();
+  }
+
+  ArrayList ^WindowSearcher::filter(String ^filter) {
+    ArrayList ^matches = gcnew ArrayList();
+    IEnumerator ^i = this->windows->GetEnumerator();
+    while (i->MoveNext()) {
+      WindowItem ^wi = (WindowItem ^)(i->Current);
+      if (wi->matches(filter)) {
+        matches->Add(wi);
+      }
+    }
+
+    return matches;
+  }
+
+  void WindowSearcher::end() { 
+    /* nothing yet */
+  }
+}

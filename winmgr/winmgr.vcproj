@@ -239,6 +239,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WindowSearcher.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\winmgr.cpp"
 				>
 			</File>
@@ -263,6 +267,10 @@
 			</File>
 			<File
 				RelativePath=".\WindowLister.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WindowSearcher.h"
 				>
 			</File>
 		</Filter>

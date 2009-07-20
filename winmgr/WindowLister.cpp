@@ -11,6 +11,7 @@ namespace winmgr {
   }
 
   ArrayList ^WindowLister::GetWindows() {
+    /* This function makes a managed function usable as an unmanaged callback */
     EnumWindowsCallback ^ewc = \
       gcnew EnumWindowsCallback(this, &WindowLister::window_handler);
     pin_ptr<EnumWindowsCallback ^> pinner = &ewc;
@@ -23,13 +24,10 @@ namespace winmgr {
 
   /* winapi types because this is invoked by a winapi (EnumWIndows) call */
   BOOL WindowLister::window_handler(HWND hwnd, LPARAM lparam) {
-    /* nothing right now */
-    WindowItem ^wi = gcnew WindowItem();
-	wchar_t data[200];
-    wi->hwnd = hwnd;
-    GetWindowText(hwnd, data, 200);
-	wi->title = gcnew String(data);
-    this->windows->Add(wi);
+    WindowItem ^wi = gcnew WindowItem(hwnd);
+    if (wi->title->Length > 0) {
+      this->windows->Add(wi);
+    }
     return TRUE;
   }
 }
