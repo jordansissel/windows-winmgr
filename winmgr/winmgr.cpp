@@ -1,63 +1,39 @@
 // winmgr.cpp : main project file.
 
 #include "stdafx.h"
-#include "Form1.h"
 #include "WindowItem.h"
+#include "WindowLister.h"
 #include <stdio.h> /* for snprintf */
 #using <mscorlib.dll>
 
-using namespace winmgr;
-using namespace System;
 using namespace System::Collections;
+using namespace System::IO;
 using namespace System::Runtime::InteropServices;
+using namespace System::Windows::Markup;
+using namespace System::Windows;
+using namespace System;
+using namespace winmgr;
 
-// A delegate type.
-delegate BOOL CallBack(HWND hwnd, LPARAM lparam);
-
-
-ref class MyTest {
-  public:
-    ArrayList ^windows;
-
-    MyTest() {
-      windows = gcnew ArrayList();
-    }
-
-    BOOL proc(HWND hwnd, LPARAM lparam) {
-      wchar_t data[200];
-      WindowItem ^wi = gcnew WindowItem();
-      wi->hwnd = hwnd;
-      GetWindowText(hwnd, data, 200);
-
-      if (data[0] != NULL) {
-        wi->title = gcnew String(data);
-        this->windows->Add(wi);
-      }
-      return TRUE;
-    }
-};
+Window ^WindowFromXaml(String ^filename) {
+  Stream ^st = File::OpenRead(filename);
+  Window ^window = (Window ^)XamlReader::Load(st);
+  st->Close();
+  return window;
+}
 
 [STAThreadAttribute]
 int main(array<System::String ^> ^args)
 {
   ArrayList ^foo;
-  // Enabling Windows XP visual effects before any controls are created
-  Application::EnableVisualStyles();
-  Application::SetCompatibleTextRenderingDefault(false); 
+  WindowLister ^wl = gcnew WindowLister();
+  Window ^main;
+  foo = wl->GetWindows();
 
-  //f->dataGridView1->DataSource = foo;
-
-  OutputDebugStringA("Hello\n");
-  MyTest ^mt = gcnew MyTest();
-  CallBack ^cb = gcnew CallBack(mt, &MyTest::proc);
-  pin_ptr<CallBack^> pinner = &cb;
-  IntPtr cbptr = Marshal::GetFunctionPointerForDelegate(cb);
-  WNDENUMPROC enumproc = static_cast<WNDENUMPROC>(cbptr.ToPointer());
-  EnumWindows(enumproc, 0);
-
-  Form1 ^f = gcnew Form1(mt->windows);
-  Application::Run(f);
-
-  return 0;
+  main = WindowFromXaml("main.xaml");
+  main->Height = 400;
+  main->Width = 600;
+  main->Title = "Testing XAML";
+  return (gcnew Application())->Run(main);
 }
+
 
