@@ -1,6 +1,7 @@
 #pragma once
 
 #include <windows.h>
+#include "WMQuery.h"
 using namespace System;
 using namespace System::ComponentModel;
 using namespace System::Collections;
@@ -14,7 +15,6 @@ namespace winmgr {
       HWND hwnd;
 
       WindowItem(HWND hwnd);
-	  bool matches(array<String ^> ^patterns);
-	  bool matches(String ^pattern);
+	  bool matches(WMQuery ^query);
   };
 }

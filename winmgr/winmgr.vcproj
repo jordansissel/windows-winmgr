@@ -246,6 +246,10 @@
 				RelativePath=".\winmgr.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\WMQuery.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -271,6 +275,10 @@
 			</File>
 			<File
 				RelativePath=".\WindowSearcher.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WMQuery.h"
 				>
 			</File>
 		</Filter>

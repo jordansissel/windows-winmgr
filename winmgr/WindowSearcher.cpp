@@ -17,15 +17,20 @@ namespace winmgr {
   ArrayList ^WindowSearcher::filter(String ^filter) {
     ArrayList ^matches = gcnew ArrayList();
     IEnumerator ^i = this->windows->GetEnumerator();
+    ArrayList ^re_list = gcnew ArrayList();
+
+    WMQuery ^query = gcnew WMQuery(filter);
+
     while (i->MoveNext()) {
       WindowItem ^wi = (WindowItem ^)(i->Current);
-      if (wi->matches(filter)) {
+      if (wi->matches(query)) {
         matches->Add(wi);
       }
     }
 
     return matches;
   }
+
 
   void WindowSearcher::end() { 
     /* nothing yet */

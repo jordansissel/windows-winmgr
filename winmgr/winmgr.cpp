@@ -15,6 +15,7 @@ using namespace System::Windows;
 using namespace System::Windows::Controls;
 using namespace System::Windows::Input;
 using namespace System;
+using namespace System::Text::RegularExpressions;
 using namespace winmgr;
 
 ref class WindowManager {
@@ -47,6 +48,9 @@ ref class WindowManager {
       TextBox ^input = (TextBox ^)sender;
       Window ^main = Application::Current->MainWindow;
       main->Title = input->Text;
+
+      ItemsControl ^l = (ItemsControl ^)main->FindName("results");
+      l->ItemsSource = this->wsearch->filter(input->Text);
     }
 
     int start() {
@@ -57,11 +61,9 @@ ref class WindowManager {
       main->Width = 600;
       main->Title = "Testing XAML";
 
-	  /* I want to have the 'loaded' event call this->onloaded(...) */
 	  main->Loaded += gcnew RoutedEventHandler(this, &WindowManager::onloaded);
 
-      TextBox ^input = (TextBox ^)main->FindName("userinput");
-	  /* Same here, I want to call this->ontextinput */
+	  TextBox ^input = (TextBox ^)main->FindName("userinput");
       input->TextChanged += gcnew TextChangedEventHandler(this, &WindowManager::ontextinput);
 
       return (gcnew Application())->Run(main);
