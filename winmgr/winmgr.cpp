@@ -31,7 +31,7 @@ ref class WindowManager {
       return window;
     }
 
-    static void onloaded(Object ^sender, RoutedEventArgs ^ev) {
+    void onloaded(Object ^sender, RoutedEventArgs ^ev) {
       Window ^main = Application::Current->MainWindow;
       main->Title = "Hello there";
 
@@ -43,11 +43,10 @@ ref class WindowManager {
       ((TextBox ^)main->FindName("userinput"))->Focus();
     }
 
-    static void ontextinput(Object ^sender, TextChangedEventArgs ^ev) {
+    void ontextinput(Object ^sender, TextChangedEventArgs ^ev) {
       TextBox ^input = (TextBox ^)sender;
       Window ^main = Application::Current->MainWindow;
       main->Title = input->Text;
-
     }
 
     int start() {
@@ -59,11 +58,11 @@ ref class WindowManager {
       main->Title = "Testing XAML";
 
 	  /* I want to have the 'loaded' event call this->onloaded(...) */
-      main->Loaded += gcnew RoutedEventHandler( /* ???? */);
+	  main->Loaded += gcnew RoutedEventHandler(this, &WindowManager::onloaded);
 
       TextBox ^input = (TextBox ^)main->FindName("userinput");
 	  /* Same here, I want to call this->ontextinput */
-      input->TextChanged += gcnew TextChangedEventHandler(&WindowManager::ontextinput);
+      input->TextChanged += gcnew TextChangedEventHandler(this, &WindowManager::ontextinput);
 
       return (gcnew Application())->Run(main);
     }
