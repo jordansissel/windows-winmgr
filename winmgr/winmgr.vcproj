@@ -299,6 +299,13 @@
 				RelativePath=".\main.xaml"
 				DeploymentContent="true"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 		<File

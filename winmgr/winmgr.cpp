@@ -36,7 +36,10 @@ ref class WindowManager {
 
     Window ^WindowFromXaml(String ^xaml) {
       XmlTextReader ^input = gcnew XmlTextReader(gcnew StringReader(xaml));
-      Window ^window = (Window ^)XamlReader::Load(input);
+		//ResourceManager ^rm = gcnew ResourceManager("", Assembly::GetExecutingAssembly());
+	  //Stream ^input = rm->GetStream("main.xaml");
+		Window ^window = (Window ^)XamlReader::Load(input);
+      //Window ^window = (Window ^)XamlReader::Load(input);
       input->Close();
       return window;
     }
