@@ -2,6 +2,10 @@
 // Microsoft Visual C++ generated include file.
 // Used by app.rc
 
+#define XAML 300
+#define IDD_MAINXAML 100
+
+
 #define MAIN_XAML \
  "<Window xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"" \
  "        xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\">" \
