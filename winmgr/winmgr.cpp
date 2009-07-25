@@ -28,6 +28,7 @@ using namespace winmgr;
 
 #include "mainwindow.h"
 
+delegate void VoidDelegate();
 
 public ref class WindowManager : Application {
   public:
@@ -42,9 +43,9 @@ public ref class WindowManager : Application {
       XmlTextReader ^input = gcnew XmlTextReader(gcnew StringReader(xaml));
 
       //Stream ^input = File::OpenRead("mainwindow.xaml";)
-      Window ^window = (Window ^)XamlReader::Load(input);
+        Window ^window = (Window ^)XamlReader::Load(input);
       input->Close();
-      return window;
+      return window;   
     }
 
     void activate() {
@@ -52,10 +53,10 @@ public ref class WindowManager : Application {
       ItemsControl ^l = (ItemsControl ^)this->MainWindow->FindName("results");
       l->ItemsSource = this->wsearch->windows;
       TextBox ^input = ((TextBox ^)this->MainWindow->FindName("userinput"));
-	  input->Text = "";
-	  input->Focus();
+      input->Text = "";
+      input->Focus(); 
       this->MainWindow->Show();
-	  this->MainWindow->Activate();
+      this->MainWindow->Activate();
     }
 
     void onloaded(Object ^sender, RoutedEventArgs ^ev) {
@@ -71,33 +72,36 @@ public ref class WindowManager : Application {
     void input_onkeypress(Object ^sender, KeyEventArgs ^ev) {
       if (ev->Key == Key::Return) {
         TextBox ^input = (TextBox ^)sender;
+
+        /* Special handle 'quit' string for exiting the program */
+		if (input->Text == "quit") {
+          this->MainWindow->Close();
+		  return;
+        }
+
         ArrayList ^windows = this->wsearch->filter(input->Text);
         //Activate the window of the first item in the list
         if (windows->Count > 0) {
           ((WindowItem ^)windows[0])->activate();
         }
         ev->Handled = true;
-		this->MainWindow->Hide();
-      } else if (ev->Key == Key::Escape) {
-        /* Destroy window */
-        //Window ^main = Application::Current->MainWindow;
-        //main->Close();
+        this->MainWindow->Hide();
       }
     }
 
     void window_onkeypress(Object ^sender, KeyEventArgs ^ev) {
       if (ev->Key == Key::Escape) {
         /* Destroy window */
-        this->MainWindow->Close();
+        this->MainWindow->Hide();
       }
     }
 
     void app_onstartup(Object ^sender, StartupEventArgs ^ev) {
+      /* Unused for the moment. */
     }
 
 
     void Initialize() {
-      this->hotkeyworker = gcnew BackgroundWorker();
       this->wsearch = gcnew winmgr::WindowSearcher();
       this->MainWindow = WindowFromXaml(MAINWINDOW_XAML);
       this->MainWindow->Height = 200;
@@ -105,12 +109,16 @@ public ref class WindowManager : Application {
       this->MainWindow->Loaded += gcnew RoutedEventHandler(this, &WindowManager::onloaded);
 
       TextBox ^input = (TextBox ^)this->MainWindow->FindName("userinput");
-      input->TextChanged += gcnew TextChangedEventHandler(this, &WindowManager::ontextinput);
+      input->TextChanged += \
+        gcnew TextChangedEventHandler(this, &WindowManager::ontextinput);
+      input->KeyDown += \
+        gcnew KeyEventHandler(this, &WindowManager::input_onkeypress);
+      this->MainWindow->KeyDown += \
+        gcnew KeyEventHandler(this, &WindowManager::window_onkeypress);
+      this->Startup += \
+        gcnew StartupEventHandler(this, &WindowManager::app_onstartup);
 
-      input->KeyDown += gcnew KeyEventHandler(this, &WindowManager::input_onkeypress);
-      this->MainWindow->KeyDown += gcnew KeyEventHandler(this, &WindowManager::window_onkeypress);
-      this->Startup += gcnew StartupEventHandler(this, &WindowManager::app_onstartup);
-
+      this->hotkeyworker = gcnew BackgroundWorker();
       this->hotkeyworker->DoWork += \
         gcnew DoWorkEventHandler(this, &WindowManager::BackgroundHotKeyHandler);
       this->hotkeyworker->RunWorkerAsync();
@@ -122,29 +130,16 @@ public ref class WindowManager : Application {
       RegisterHotKey(NULL, 1, MOD_ALT, VK_SPACE);
       while (GetMessage(&msg, NULL, 0, 0) != 0) {
         if (msg.message == WM_HOTKEY) {
-          //MessageBox::Show("Hello");
-          //bw->ReportProgress(0); /* lame hack */
-	      this->Dispatcher->Invoke(DispatcherPriority::Normal,
-			                       gcnew voiddelegate(this, &WindowManager::activate));
+          VoidDelegate ^vd = gcnew VoidDelegate(this, &WindowManager::activate);
+          this->Dispatcher->Invoke(DispatcherPriority::Normal, vd);
         }
       }
       UnregisterHotKey(NULL, 1);
-    }
-
-	delegate void voiddelegate();
-
-    void BackgroundHotKeyActivated(Object ^sender, ProgressChangedEventArgs ^ev) {
-		this->Dispatcher->Invoke(System::Windows::Threading::DispatcherPriority::Normal,
-			gcnew voiddelegate(this, &WindowManager::activate));
     }
 };
 
 [STAThreadAttribute]
 int main(array<System::String ^> ^args) {
   WindowManager ^wm = gcnew WindowManager();
-  //HotKeyThread ^hkt = gcnew HotKeyThread(wm);
-  //Thread ^hotkeythread = gcnew Thread(gcnew ThreadStart(hkt, &HotKeyThread::ThreadProc));
-  //hotkeythread->Start();
-
   return wm->Run();
 }

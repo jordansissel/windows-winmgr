@@ -1,29 +1,41 @@
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" AllowsTransparency="True"
-        ResizeMode="NoResize" Background="black" Foreground="White"> 
-  <DockPanel>
-    <TextBox DockPanel.Dock="Top" Name="userinput" Foreground="#FF88FF88"
-             Background="Black" FontSize="14" Padding="5,5,5,5">
-    </TextBox>
-
-    <ListBox Name="results" Background="Transparent" Foreground="White"
-             ScrollViewer.VerticalScrollBarVisibility="Hidden">
-      <ListBox.ItemTemplate>
-        <DataTemplate>
-          <DataTemplate.Resources>
-            <Style TargetType="TextBlock">
-              <Setter Property="FontSize" Value="14"/>
-              <Setter Property="HorizontalAlignment" Value="Center"/>
-            </Style>
-          </DataTemplate.Resources>
-          <Grid>
-            <StackPanel>
-              <TextBlock Margin="3,0,3,7" Text="{Binding Path=title}"/>
-            </StackPanel>
-          </Grid>
-        </DataTemplate>
-      </ListBox.ItemTemplate>
-    </ListBox>
-  </DockPanel>
+        ResizeMode="NoResize" Background="Transparent"> 
+  <Grid>
+    <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+             Width="Auto" Height="Auto" RadiusX="6" RadiusY="6">
+      <Rectangle.Fill>
+        <LinearGradientBrush StartPoint="0.5, 0" EndPoint="0.5, 1">
+          <GradientStop Color="#FF115533" Offset="0.0" />
+          <GradientStop Color="#FF000000" Offset="1.0" />
+        </LinearGradientBrush>
+      </Rectangle.Fill>
+    </Rectangle>
+    <DockPanel>
+      <TextBox DockPanel.Dock="Top" Name="userinput" Foreground="#FF88FF88"
+               Background="Transparent" FontSize="14" Padding="6,6,6,6"
+               BorderThickness="0">
+      </TextBox>
+      <ListBox Name="results" Background="Transparent" Foreground="White"
+               ScrollViewer.VerticalScrollBarVisibility="Hidden"
+               Padding="6,6,6,6" BorderThickness="0">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <DataTemplate.Resources>
+              <Style TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+              </Style>
+            </DataTemplate.Resources>
+            <Grid>
+              <StackPanel>
+                <TextBlock Margin="3,0,3,7" Text="{Binding Path=title}"/>
+              </StackPanel>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
+  </Grid>
 </Window>
