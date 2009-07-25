@@ -21,7 +21,7 @@
 LANGUAGE 9, 1
 #pragma code_page(1252)
 1           ICON         "app.ico"
-IDD_MAINXAML XAML "main.xaml"
+IDD_MAINXAML HTML        "mainwindow.xaml"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

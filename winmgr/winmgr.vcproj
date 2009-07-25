@@ -73,6 +73,8 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				EmbedManifest="false"
+				AssemblyIdentity=""
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -211,6 +213,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\mainwindow.xaml"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="C:\ruby\bin\ruby.exe $(InputDir)\xaml2h.rb $(InputDir)\$(InputFileName) $(InputDir)&#x0D;&#x0A;"
+						Outputs="mainwindow.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -294,18 +309,6 @@
 			<File
 				RelativePath=".\app.rc"
 				>
-			</File>
-			<File
-				RelativePath=".\main.xaml"
-				DeploymentContent="true"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<File

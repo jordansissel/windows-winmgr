@@ -5,6 +5,7 @@
 #include "WindowLister.h"
 #include "WindowSearcher.h"
 #include "resource.h"
+
 #include <stdio.h> /* for snprintf */
 #using <mscorlib.dll>
 
@@ -22,79 +23,86 @@ using namespace System::Reflection;
 using namespace System::Text::RegularExpressions;
 using namespace winmgr;
 
-ref class Test {
-public:
-  property String ^title;
-};
+#include "mainwindow.h"
 
-ref class WindowManager {
+ref class WindowManager : Application {
   public:
     WindowSearcher ^wsearch;
     WindowManager() {
-      this->wsearch = gcnew winmgr::WindowSearcher();
+      this->Initialize();
     }
 
     Window ^WindowFromXaml(String ^xaml) {
       XmlTextReader ^input = gcnew XmlTextReader(gcnew StringReader(xaml));
-		//ResourceManager ^rm = gcnew ResourceManager("", Assembly::GetExecutingAssembly());
-	  //Stream ^input = rm->GetStream("main.xaml");
-		Window ^window = (Window ^)XamlReader::Load(input);
-      //Window ^window = (Window ^)XamlReader::Load(input);
+      
+      //Stream ^input = File::OpenRead("mainwindow.xaml";)
+	  Window ^window = (Window ^)XamlReader::Load(input);
+
       input->Close();
       return window;
     }
 
     void onloaded(Object ^sender, RoutedEventArgs ^ev) {
-      Window ^main = Application::Current->MainWindow;
-      main->Title = "Hello there";
+      ////main->Title = "Hello there";
 
       this->wsearch->start();
 
-      ItemsControl ^l = (ItemsControl ^)main->FindName("results");
+      ItemsControl ^l = (ItemsControl ^)this->MainWindow->FindName("results");
       l->ItemsSource = this->wsearch->windows;
-      ((TextBox ^)main->FindName("userinput"))->Focus();
+      ((TextBox ^)this->MainWindow->FindName("userinput"))->Focus();
     }
 
     void ontextinput(Object ^sender, TextChangedEventArgs ^ev) {
       TextBox ^input = (TextBox ^)sender;
-      Window ^main = Application::Current->MainWindow;
-      main->Title = input->Text;
-
-      ItemsControl ^l = (ItemsControl ^)main->FindName("results");
+      ItemsControl ^l = (ItemsControl ^)this->MainWindow->FindName("results");
       l->ItemsSource = this->wsearch->filter(input->Text);
     }
 
-    void onkeypress(Object ^sender, KeyEventArgs ^ev) {
+    void input_onkeypress(Object ^sender, KeyEventArgs ^ev) {
       if (ev->Key == Key::Return) {
         TextBox ^input = (TextBox ^)sender;
         ArrayList ^windows = this->wsearch->filter(input->Text);
         //Activate the window of the first item in the list
-		if (windows->Count > 0) {
+        if (windows->Count > 0) {
           ((WindowItem ^)windows[0])->activate();
-		}
-
+        }
+        ev->Handled = true;
+      } else if (ev->Key == Key::Escape) {
+        /* Destroy window */
+        //Window ^main = Application::Current->MainWindow;
+        //main->Close();
       }
     }
 
-    int start() {
-      Window ^main;
-      main = WindowFromXaml(MAIN_XAML);
-      main->Height = 400;
-      main->Width = 600;
-      main->Title = "Testing XAML";
+    void window_onkeypress(Object ^sender, KeyEventArgs ^ev) {
+      if (ev->Key == Key::Escape) {
+        /* Destroy window */
+        this->MainWindow->Close();
+      }
+    }
 
-      main->Loaded += gcnew RoutedEventHandler(this, &WindowManager::onloaded);
+	void app_onstartup(Object ^sender, StartupEventArgs ^ev) {
+		this->MainWindow->Show();
+	}
 
-      TextBox ^input = (TextBox ^)main->FindName("userinput");
+    void Initialize() {
+      this->wsearch = gcnew winmgr::WindowSearcher();
+      this->MainWindow = WindowFromXaml(MAINWINDOW_XAML);
+      this->MainWindow->Height = 200;
+      this->MainWindow->Width = 600;
+      //main->Title = "Testing XAML";
+      this->MainWindow->Loaded += gcnew RoutedEventHandler(this, &WindowManager::onloaded);
+
+      TextBox ^input = (TextBox ^)this->MainWindow->FindName("userinput");
       input->TextChanged += gcnew TextChangedEventHandler(this, &WindowManager::ontextinput);
 
-      input->KeyDown += gcnew KeyEventHandler(this, &WindowManager::onkeypress);
-
-      return (gcnew Application())->Run(main);
+      input->KeyDown += gcnew KeyEventHandler(this, &WindowManager::input_onkeypress);
+      this->MainWindow->KeyDown += gcnew KeyEventHandler(this, &WindowManager::window_onkeypress);
+	  this->Startup += gcnew StartupEventHandler(this, &WindowManager::app_onstartup);
     }
 };
 
 [STAThreadAttribute]
 int main(array<System::String ^> ^args) {
-  return (gcnew WindowManager())->start();
+  return (gcnew WindowManager())->Run();
 }
