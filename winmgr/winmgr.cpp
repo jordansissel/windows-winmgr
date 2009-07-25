@@ -10,9 +10,11 @@
 #using <mscorlib.dll>
 
 using namespace System::Collections;
+using namespace System::Threading;
 using namespace System::IO;
 using namespace System::Runtime::InteropServices;
 using namespace System::Windows::Markup;
+using namespace System::Windows::Interop;
 using namespace System::Windows;
 using namespace System::Windows::Controls;
 using namespace System::Windows::Input;
@@ -25,7 +27,8 @@ using namespace winmgr;
 
 #include "mainwindow.h"
 
-ref class WindowManager : Application {
+
+public ref class WindowManager : Application {
   public:
     WindowSearcher ^wsearch;
     WindowManager() {
@@ -34,23 +37,24 @@ ref class WindowManager : Application {
 
     Window ^WindowFromXaml(String ^xaml) {
       XmlTextReader ^input = gcnew XmlTextReader(gcnew StringReader(xaml));
-      
-      //Stream ^input = File::OpenRead("mainwindow.xaml";)
-	  Window ^window = (Window ^)XamlReader::Load(input);
 
+      //Stream ^input = File::OpenRead("mainwindow.xaml";)
+    Window ^window = (Window ^)XamlReader::Load(input);
       input->Close();
       return window;
     }
-
-    void onloaded(Object ^sender, RoutedEventArgs ^ev) {
-      ////main->Title = "Hello there";
-
+	
+	void activate() {
       this->wsearch->start();
-
       ItemsControl ^l = (ItemsControl ^)this->MainWindow->FindName("results");
       l->ItemsSource = this->wsearch->windows;
       ((TextBox ^)this->MainWindow->FindName("userinput"))->Focus();
-    }
+
+	}
+
+    void onloaded(Object ^sender, RoutedEventArgs ^ev) {
+		/* Nothing */
+	}
 
     void ontextinput(Object ^sender, TextChangedEventArgs ^ev) {
       TextBox ^input = (TextBox ^)sender;
@@ -81,9 +85,9 @@ ref class WindowManager : Application {
       }
     }
 
-	void app_onstartup(Object ^sender, StartupEventArgs ^ev) {
-		this->MainWindow->Show();
-	}
+  void app_onstartup(Object ^sender, StartupEventArgs ^ev) {
+    this->MainWindow->Show();
+  }
 
     void Initialize() {
       this->wsearch = gcnew winmgr::WindowSearcher();
@@ -98,11 +102,42 @@ ref class WindowManager : Application {
 
       input->KeyDown += gcnew KeyEventHandler(this, &WindowManager::input_onkeypress);
       this->MainWindow->KeyDown += gcnew KeyEventHandler(this, &WindowManager::window_onkeypress);
-	  this->Startup += gcnew StartupEventHandler(this, &WindowManager::app_onstartup);
+      this->Startup += gcnew StartupEventHandler(this, &WindowManager::app_onstartup);
     }
+
 };
+
+public ref class HotKeyThread {
+private:
+  WindowManager ^wm;
+
+public:
+  HotKeyThread(WindowManager ^wm) {
+    this->wm = wm;
+  }
+
+  void ThreadProc() {
+    tagMSG msg = {0};
+    while (GetMessage(&msg, NULL, 0, 0) != 0) {
+      if (msg.message == WM_HOTKEY) {
+        wm->activate();
+      }
+	}
+  }
+ };
 
 [STAThreadAttribute]
 int main(array<System::String ^> ^args) {
-  return (gcnew WindowManager())->Run();
+  if (RegisterHotKey(NULL, 1, MOD_ALT, VK_SPACE)) {
+    /* Safe */
+  } else {
+    /* fail */
+  }
+
+  WindowManager ^wm = gcnew WindowManager();
+  HotKeyThread ^hkt = gcnew HotKeyThread(wm);
+  Thread ^hotkeythread = gcnew Thread(gcnew ThreadStart(hkt, &HotKeyThread::ThreadProc));
+  hotkeythread->Start();
+
+  return wm->Run();
 }
