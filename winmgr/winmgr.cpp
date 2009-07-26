@@ -76,6 +76,7 @@ public ref class WindowManager : Application {
         /* Special handle 'quit' string for exiting the program */
 		if (input->Text == "quit") {
           this->MainWindow->Close();
+		  exit(0);
 		  return;
         }
 
