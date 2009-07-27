@@ -63,7 +63,13 @@ public ref class WindowManager : Application {
     void input_ontextinput(Object ^sender, TextChangedEventArgs ^ev) {
       TextBox ^input = (TextBox ^)sender;
       ItemsControl ^l = (ItemsControl ^)this->MainWindow->FindName("results");
-      l->ItemsSource = this->wsearch->filter(input->Text);
+      try {
+        ArrayList ^matches = this->wsearch->filter(input->Text);
+        l->ItemsSource = matches;
+      } catch (System::ArgumentException ^) {
+        /* Do nothing */
+      }
+
     }
 
     void input_onkeypress(Object ^sender, KeyEventArgs ^ev) {

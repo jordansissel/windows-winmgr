@@ -8,6 +8,7 @@ using namespace System::Drawing;
 using namespace System::ComponentModel;
 using namespace System::Collections;
 using namespace System::Diagnostics;
+using namespace System::Windows::Media;
 
 namespace winmgr {
   public ref class WindowItem {
