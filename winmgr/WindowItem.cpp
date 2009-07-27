@@ -1,14 +1,26 @@
 #include "StdAfx.h"
 #include "WindowItem.h"
+#include <Psapi.h>
+#include <shellapi.h>
 
 namespace winmgr {
   using namespace System::Text::RegularExpressions;
 
   WindowItem::WindowItem(HWND hwnd) {
-    wchar_t data[200];
+    wchar_t data[256];
     this->hwnd = hwnd;
-    GetWindowText(hwnd, data, 200);
+
+    GetWindowText(hwnd, data, 255);
     this->title = gcnew String(data);
+
+    DWORD pid;
+    GetWindowThreadProcessId(hwnd, &pid);
+    this->pid = gcnew Int32(pid);
+    HANDLE proc = OpenProcess(PROCESS_QUERY_INFORMATION, false, pid);
+    GetProcessImageFileName(proc, data, 255);
+    this->executable = gcnew String(data);
+	SHFILEINFO sfi = {0};
+	SHGetFileInfo(data, -1, &sfi, sizeof(sfi), SHGFI_ICON | SHGFI_LARGEICON);
   }
 
   bool WindowItem::matches(WMQuery ^query) {

@@ -5,6 +5,7 @@
 #include "WindowLister.h"
 #include "WindowSearcher.h"
 #include "resource.h"
+#include "searchwin.h" /* comes from searchwin.xaml */
 
 #include <stdio.h> /* for snprintf */
 #using <mscorlib.dll>
@@ -26,8 +27,6 @@ using namespace System::Reflection;
 using namespace System::Text::RegularExpressions;
 using namespace winmgr;
 
-#include "mainwindow.h"
-
 delegate void VoidDelegate();
 
 public ref class WindowManager : Application {
@@ -41,11 +40,9 @@ public ref class WindowManager : Application {
 
     Window ^WindowFromXaml(String ^xaml) {
       XmlTextReader ^input = gcnew XmlTextReader(gcnew StringReader(xaml));
-
-      //Stream ^input = File::OpenRead("mainwindow.xaml";)
-        Window ^window = (Window ^)XamlReader::Load(input);
+      Window ^window = (Window ^)XamlReader::Load(input);
       input->Close();
-      return window;   
+      return window;
     }
 
     void activate() {
@@ -63,7 +60,7 @@ public ref class WindowManager : Application {
       /* Nothing */
     }
 
-    void ontextinput(Object ^sender, TextChangedEventArgs ^ev) {
+    void input_ontextinput(Object ^sender, TextChangedEventArgs ^ev) {
       TextBox ^input = (TextBox ^)sender;
       ItemsControl ^l = (ItemsControl ^)this->MainWindow->FindName("results");
       l->ItemsSource = this->wsearch->filter(input->Text);
@@ -74,10 +71,10 @@ public ref class WindowManager : Application {
         TextBox ^input = (TextBox ^)sender;
 
         /* Special handle 'quit' string for exiting the program */
-		if (input->Text == "quit") {
-          this->MainWindow->Close();
-		  exit(0);
-		  return;
+        if (input->Text == "quit") {
+          this->MainWindow->Hide();
+          exit(0);
+          return;
         }
 
         ArrayList ^windows = this->wsearch->filter(input->Text);
@@ -97,6 +94,12 @@ public ref class WindowManager : Application {
       }
     }
 
+	void window_onmousedown(Object ^sender, MouseButtonEventArgs ^ev) {
+		if (ev->ChangedButton == MouseButton::Left) {
+			this->MainWindow->DragMove();
+		}
+	}
+
     void app_onstartup(Object ^sender, StartupEventArgs ^ev) {
       /* Unused for the moment. */
     }
@@ -104,18 +107,20 @@ public ref class WindowManager : Application {
 
     void Initialize() {
       this->wsearch = gcnew winmgr::WindowSearcher();
-      this->MainWindow = WindowFromXaml(MAINWINDOW_XAML);
+      this->MainWindow = WindowFromXaml(SEARCHWIN_XAML);
       this->MainWindow->Height = 200;
       this->MainWindow->Width = 600;
       this->MainWindow->Loaded += gcnew RoutedEventHandler(this, &WindowManager::onloaded);
 
       TextBox ^input = (TextBox ^)this->MainWindow->FindName("userinput");
       input->TextChanged += \
-        gcnew TextChangedEventHandler(this, &WindowManager::ontextinput);
+        gcnew TextChangedEventHandler(this, &WindowManager::input_ontextinput);
       input->KeyDown += \
         gcnew KeyEventHandler(this, &WindowManager::input_onkeypress);
       this->MainWindow->KeyDown += \
         gcnew KeyEventHandler(this, &WindowManager::window_onkeypress);
+	  this->MainWindow->MouseDown += \
+		gcnew MouseButtonEventHandler(this, &WindowManager::window_onmousedown);
       this->Startup += \
         gcnew StartupEventHandler(this, &WindowManager::app_onstartup);
 

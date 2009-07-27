@@ -17,25 +17,27 @@
                Background="Transparent" FontSize="14" Padding="6,6,6,6"
                BorderThickness="0">
       </TextBox>
-      <ListBox Name="results" Background="Transparent" Foreground="White"
-               ScrollViewer.VerticalScrollBarVisibility="Hidden"
-               Padding="6,6,6,6" BorderThickness="0">
-        <ListBox.ItemTemplate>
+      <StackPanel>
+      <ItemsControl Name="results">
+        <ItemsControl.ItemTemplate>
           <DataTemplate>
             <DataTemplate.Resources>
               <Style TargetType="TextBlock">
                 <Setter Property="FontSize" Value="14"/>
-                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="Foreground" Value="#FFFFFFFF"/>
               </Style>
             </DataTemplate.Resources>
             <Grid>
-              <StackPanel>
+              <ItemsControl>
+                <TextBlock Margin="3,0,3,7" Text="{Binding Path=executable}"/>
                 <TextBlock Margin="3,0,3,7" Text="{Binding Path=title}"/>
-              </StackPanel>
+              </ItemsControl>
             </Grid>
           </DataTemplate>
-        </ListBox.ItemTemplate>
-      </ListBox>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      </StackPanel>
     </DockPanel>
   </Grid>
 </Window>

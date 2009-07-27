@@ -59,9 +59,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="user32.lib"
+				AdditionalDependencies="user32.lib kernel32.lib psapi.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\Microsoft SDKs\Windows\v6.0\Lib\x86&quot;"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\Microsoft SDKs\Windows\v6.0\Lib\&quot;"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				SubSystem="2"
@@ -213,7 +213,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\mainwindow.xaml"
+				RelativePath=".\searchwin.xaml"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
