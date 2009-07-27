@@ -11,7 +11,9 @@ namespace winmgr {
 
   void WindowSearcher::start() { 
     WindowLister ^lister = gcnew WindowLister();
-    this->windows = lister->GetWindows();
+    if (this->windows->Count == 0) {
+      this->windows = lister->GetWindows();
+    }
   }
 
   ArrayList ^WindowSearcher::filter(String ^filter) {

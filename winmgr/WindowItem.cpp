@@ -16,6 +16,8 @@ namespace winmgr {
     GetWindowText(hwnd, data, 255);
     this->title = gcnew String(data);
 
+    this->visible = IsWindowVisible(hwnd);
+
     DWORD pid;
     DWORD len = 255;
     GetWindowThreadProcessId(hwnd, &pid);
@@ -36,14 +38,10 @@ namespace winmgr {
     } catch (FileNotFoundException ^) {
 
     }
-
-    //SHFILEINFO sfi = {0};
-    //SHGetFileInfo(data, -1, &sfi, sizeof(sfi), SHGFI_ICON | SHGFI_LARGEICON);
-    //BitmapSource ^icon = System::Windows::Interop::Imaging::CreateBitmapSourceFromHIcon(sfi.hIcon, System::Windows::Int32Rect::Empty
   }
 
   bool WindowItem::matches(WMQuery ^query) {
-    return query->is_match(this->title);
+    return this->visible && query->is_match(this->title);
   }
 
   void WindowItem::activate(void) {

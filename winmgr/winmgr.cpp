@@ -33,6 +33,7 @@ public ref class WindowManager : Application {
   public:
     WindowSearcher ^wsearch;
     BackgroundWorker ^hotkeyworker;
+    BackgroundWorker ^windowupdater;
 
     WindowManager() {
       this->Initialize();
@@ -46,14 +47,15 @@ public ref class WindowManager : Application {
     }
 
     void activate() {
-      this->wsearch->start();
+      //this->wsearch->start();
       ItemsControl ^l = (ItemsControl ^)this->MainWindow->FindName("results");
       l->ItemsSource = this->wsearch->windows;
       TextBox ^input = ((TextBox ^)this->MainWindow->FindName("userinput"));
       input->Text = "";
-      input->Focus(); 
-      this->MainWindow->Show();
+
+	  this->MainWindow->Show();
       this->MainWindow->Activate();
+	  input->Focus();
     }
 
     void onloaded(Object ^sender, RoutedEventArgs ^ev) {
@@ -63,13 +65,7 @@ public ref class WindowManager : Application {
     void input_ontextinput(Object ^sender, TextChangedEventArgs ^ev) {
       TextBox ^input = (TextBox ^)sender;
       ItemsControl ^l = (ItemsControl ^)this->MainWindow->FindName("results");
-      try {
-        ArrayList ^matches = this->wsearch->filter(input->Text);
-        l->ItemsSource = matches;
-      } catch (System::ArgumentException ^) {
-        /* Do nothing */
-      }
-
+      l->ItemsSource = this->wsearch->filter(input->Text);
     }
 
     void input_onkeypress(Object ^sender, KeyEventArgs ^ev) {
@@ -134,6 +130,18 @@ public ref class WindowManager : Application {
       this->hotkeyworker->DoWork += \
         gcnew DoWorkEventHandler(this, &WindowManager::BackgroundHotKeyHandler);
       this->hotkeyworker->RunWorkerAsync();
+
+      this->windowupdater = gcnew BackgroundWorker();
+      this->windowupdater->DoWork += \
+        gcnew DoWorkEventHandler(this, &WindowManager::BackgroundWindowUpdater);
+      this->windowupdater->RunWorkerAsync();
+    }
+
+    void BackgroundWindowUpdater(Object ^sender, DoWorkEventArgs ^ev) {
+	  /* Really, we should listen for window creation/destruction.
+	   * and for window title changes */
+      this->wsearch->start();
+      ::Sleep(10000);
     }
 
     void BackgroundHotKeyHandler(Object ^sender, DoWorkEventArgs ^ev) {

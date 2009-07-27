@@ -17,6 +17,7 @@ namespace winmgr {
       property String^ winclass;
       property String^ executable;
       property ImageSource^ icon;
+      property bool visible;
       property Int32^ pid;
       HWND hwnd;
 
