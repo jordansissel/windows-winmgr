@@ -2,42 +2,38 @@
 #include "WindowItem.h"
 #include <Psapi.h>
 #include <shellapi.h>
+#include "ImageCache.h"
 
 namespace winmgr {
+  /* Undef this so Icon::ExtractAssociatedIcon works properly */
+  #undef ExtractAssociatedIcon
+
   using namespace System::Text::RegularExpressions;
   using namespace System::Windows::Media::Imaging;
   using namespace System::Windows::Interop;
+  using namespace System::Collections::Generic;
   using namespace System::IO;
 
-  WindowItem::WindowItem(HWND hwnd) {
+  WindowItem::WindowItem(HWND hwnd, ImageCache ^iconcache) {
     wchar_t data[256];
-    this->hwnd = hwnd;
-
-    GetWindowText(hwnd, data, 255);
-    this->title = gcnew String(data);
-
-    this->visible = IsWindowVisible(hwnd);
-
     DWORD pid;
     DWORD len = 255;
+
+    this->hwnd = hwnd;
+    GetWindowText(hwnd, data, len);
+    this->title = gcnew String(data);
+    this->visible = IsWindowVisible(hwnd);
     GetWindowThreadProcessId(hwnd, &pid);
     this->pid = gcnew Int32(pid);
-    HANDLE proc = OpenProcess(PROCESS_QUERY_INFORMATION, false, pid);
-    //GetProcessImageFileName(proc, data, 255);
-    QueryFullProcessImageName(proc, 0, data, &len);
-    this->executable = gcnew String(data);
-#undef ExtractAssociatedIcon
-    try {
-      System::Drawing::Icon ^icon = System::Drawing::Icon::ExtractAssociatedIcon(this->executable);
-      MemoryStream ^iconstream = gcnew MemoryStream();
-      icon->Save(iconstream);
-      IconBitmapDecoder ^ibd = gcnew IconBitmapDecoder(iconstream, BitmapCreateOptions::None, BitmapCacheOption::Default);
-      this->icon = ibd->Frames[0];
-    } catch (ArgumentException ^) {
-      // nothing
-    } catch (FileNotFoundException ^) {
 
-    }
+    /* Skip windows that aren't visible */
+    if (this->visible) {
+      HANDLE proc = OpenProcess(PROCESS_QUERY_INFORMATION, false, pid);
+      QueryFullProcessImageName(proc, 0, data, &len);
+      CloseHandle(proc);
+      this->executable = gcnew String(data);
+      this->icon = iconcache->GetIconForExecutable(this->executable);
+	} /* if visible */
   }
 
   bool WindowItem::matches(WMQuery ^query) {

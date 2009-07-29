@@ -18,7 +18,8 @@ namespace winmgr {
 
   ArrayList ^WindowSearcher::filter(String ^filter) {
     ArrayList ^matches = gcnew ArrayList();
-    IEnumerator ^i = this->windows->GetEnumerator();
+    System::Collections::IEnumerator ^i = \
+      this->windows->GetEnumerator();
     ArrayList ^re_list = gcnew ArrayList();
 
     WMQuery ^query = gcnew WMQuery(filter);

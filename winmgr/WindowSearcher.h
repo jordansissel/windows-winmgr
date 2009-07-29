@@ -4,12 +4,12 @@ namespace winmgr {
   using namespace System::Collections;
 
   public ref class WindowSearcher {
-  public:
-    ArrayList ^windows;
-    WindowSearcher();
+    public:
+      ArrayList ^windows;
+      WindowSearcher();
 
-	void start();
-    ArrayList ^filter(String ^filter);
-    void end();
+      void start();
+      ArrayList ^filter(String ^filter);
+      void end();
   };
 }

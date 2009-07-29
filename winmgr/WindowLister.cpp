@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "WindowLister.h"
 #include "WindowItem.h"
+#include "ImageCache.h"
 
 namespace winmgr { 
   using namespace System;
@@ -8,6 +9,7 @@ namespace winmgr {
 
   WindowLister::WindowLister(void) {
     this->windows = gcnew ArrayList();
+    this->imagecache = gcnew ImageCache();
   }
 
   ArrayList ^WindowLister::GetWindows() {
@@ -24,8 +26,8 @@ namespace winmgr {
 
   /* winapi types because this is invoked by a winapi (EnumWIndows) call */
   BOOL WindowLister::window_handler(HWND hwnd, LPARAM lparam) {
-    WindowItem ^wi = gcnew WindowItem(hwnd);
-    if (wi->title->Length > 0) {
+    WindowItem ^wi = gcnew WindowItem(hwnd, this->imagecache);
+    if (wi->title->Length > 0 && wi->visible) {
       this->windows->Add(wi);
     }
     return TRUE;

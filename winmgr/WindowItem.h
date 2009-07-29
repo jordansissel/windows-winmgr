@@ -2,6 +2,7 @@
 
 #include <windows.h>
 #include "WMQuery.h"
+#include "ImageCache.h"
 
 using namespace System;
 using namespace System::Drawing;
@@ -21,7 +22,7 @@ namespace winmgr {
       property Int32^ pid;
       HWND hwnd;
 
-      WindowItem(HWND hwnd);
+      WindowItem(HWND hwnd, ImageCache ^iconcache);
       bool matches(WMQuery ^query);
       void activate();
   };

@@ -56,6 +56,7 @@ public ref class WindowManager : Application {
 	  this->MainWindow->Show();
       this->MainWindow->Activate();
 	  input->Focus();
+	  this->MainWindow->Topmost = true; /* Set always on top */
     }
 
     void onloaded(Object ^sender, RoutedEventArgs ^ev) {
@@ -65,7 +66,12 @@ public ref class WindowManager : Application {
     void input_ontextinput(Object ^sender, TextChangedEventArgs ^ev) {
       TextBox ^input = (TextBox ^)sender;
       ItemsControl ^l = (ItemsControl ^)this->MainWindow->FindName("results");
-      l->ItemsSource = this->wsearch->filter(input->Text);
+      try {
+        l->ItemsSource = this->wsearch->filter(input->Text);
+      } catch (ArgumentException ^) {
+        /* regexp compilation error, ignore it and do not alter the
+         * filtered view. */
+      }
     }
 
     void input_onkeypress(Object ^sender, KeyEventArgs ^ev) {
@@ -147,8 +153,10 @@ public ref class WindowManager : Application {
     void BackgroundHotKeyHandler(Object ^sender, DoWorkEventArgs ^ev) {
       tagMSG msg = {0};
       BackgroundWorker ^bw = (BackgroundWorker ^)sender;
+	  //RegisterHotKey(NULL, 1, MOD_CONTROL, VK_OEM_1);  // registers ctrl+semicolon
       RegisterHotKey(NULL, 1, MOD_ALT, VK_SPACE);
-      while (GetMessage(&msg, NULL, 0, 0) != 0) {
+
+      while (GetMessage(&msg, NULL, 0, 0) != 0) { 
         if (msg.message == WM_HOTKEY) {
           VoidDelegate ^vd = gcnew VoidDelegate(this, &WindowManager::activate);
           this->Dispatcher->Invoke(DispatcherPriority::Normal, vd);

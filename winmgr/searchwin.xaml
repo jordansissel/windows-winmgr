@@ -13,8 +13,12 @@
       </Rectangle.Fill>
     </Rectangle>
     <DockPanel>
+      <!-- Set background to transparent *and* black so the Caret (cursor) color
+           is white. Cursor color by default is the inverse of the background.
+           Yes, this is a stupid hack.
+           -->
       <TextBox DockPanel.Dock="Top" Name="userinput" Foreground="#FF88FF88"
-               Background="Transparent" FontSize="14" Padding="6,6,6,6"
+               Background="#00000000" FontSize="14" Padding="6,6,6,6"
                BorderThickness="0">
       </TextBox>
       <StackPanel>
