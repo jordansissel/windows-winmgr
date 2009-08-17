@@ -47,18 +47,26 @@ public ref class WindowManager : Application {
     }
 
     void activate() {
-      //this->wsearch->start();
       ItemsControl ^l = (ItemsControl ^)this->MainWindow->FindName("results");
       l->ItemsSource = this->wsearch->windows;
       TextBox ^input = ((TextBox ^)this->MainWindow->FindName("userinput"));
       input->Text = "";
 
-	  this->MainWindow->Show();
+      this->MainWindow->Top = -100;
+      this->MainWindow->Show();
       this->MainWindow->Activate();
-	  input->Focus();
-	  this->MainWindow->Topmost = true; /* Set always on top */
-    }
+      this->MainWindow->Topmost = true; /* Set always on top */
+      this->MainWindow->Focus();
 
+      input->Focus();
+      //BackgroundWorker ^animate_in = gcnew BackgroundWorker();
+      //animate_in->DoWork += \
+        //gcnew DoWorkEventHandler(this, &WindowManager::BackgroundAnimateIn);
+      //animate_in->RunWorkerAsync();
+
+      //System::Windows::Media::Animatio
+      this->MainWindow->Top = 0;
+    }	
     void onloaded(Object ^sender, RoutedEventArgs ^ev) {
       /* Nothing */
     }
@@ -102,11 +110,11 @@ public ref class WindowManager : Application {
       }
     }
 
-	void window_onmousedown(Object ^sender, MouseButtonEventArgs ^ev) {
-		if (ev->ChangedButton == MouseButton::Left) {
-			this->MainWindow->DragMove();
-		}
-	}
+    void window_onmousedown(Object ^sender, MouseButtonEventArgs ^ev) {
+      //if (ev->ChangedButton == MouseButton::Left) {
+        //this->MainWindow->DragMove();
+      //}
+    }
 
     void app_onstartup(Object ^sender, StartupEventArgs ^ev) {
       /* Unused for the moment. */
@@ -116,8 +124,10 @@ public ref class WindowManager : Application {
     void Initialize() {
       this->wsearch = gcnew winmgr::WindowSearcher();
       this->MainWindow = WindowFromXaml(SEARCHWIN_XAML);
-      this->MainWindow->Height = 200;
-      this->MainWindow->Width = 600;
+      this->MainWindow->Left = 0;
+      this->MainWindow->Top = 0;
+      //this->MainWindow->Height = 200;
+      //this->MainWindow->Width = 600;
       this->MainWindow->Loaded += gcnew RoutedEventHandler(this, &WindowManager::onloaded);
 
       TextBox ^input = (TextBox ^)this->MainWindow->FindName("userinput");
@@ -127,8 +137,9 @@ public ref class WindowManager : Application {
         gcnew KeyEventHandler(this, &WindowManager::input_onkeypress);
       this->MainWindow->KeyDown += \
         gcnew KeyEventHandler(this, &WindowManager::window_onkeypress);
-	  this->MainWindow->MouseDown += \
-		gcnew MouseButtonEventHandler(this, &WindowManager::window_onmousedown);
+      this->MainWindow->MouseDown += \
+        gcnew MouseButtonEventHandler(this, &WindowManager::window_onmousedown);
+	  this->MainWindow->Mouse 
       this->Startup += \
         gcnew StartupEventHandler(this, &WindowManager::app_onstartup);
 
@@ -144,16 +155,24 @@ public ref class WindowManager : Application {
     }
 
     void BackgroundWindowUpdater(Object ^sender, DoWorkEventArgs ^ev) {
-	  /* Really, we should listen for window creation/destruction.
-	   * and for window title changes */
-      this->wsearch->start();
-      ::Sleep(10000);
+      /* Really, we should listen for window creation/destruction.
+       * and for window title changes */
+      while (true) {
+        this->wsearch->start();
+        ::Sleep(2000);
+      }
+    }
+
+    void BackgroundAnimateIn(Object ^sender, DoWorkEventArgs ^ev) {
+      while (this->MainWindow->Top < 0) {
+        this->MainWindow->Top += 1;
+        ::Sleep(1);
+      }
     }
 
     void BackgroundHotKeyHandler(Object ^sender, DoWorkEventArgs ^ev) {
       tagMSG msg = {0};
       BackgroundWorker ^bw = (BackgroundWorker ^)sender;
-	  //RegisterHotKey(NULL, 1, MOD_CONTROL, VK_OEM_1);  // registers ctrl+semicolon
       RegisterHotKey(NULL, 1, MOD_ALT, VK_SPACE);
 
       while (GetMessage(&msg, NULL, 0, 0) != 0) { 

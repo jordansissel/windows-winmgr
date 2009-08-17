@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VisualStudioToolFile
+	Name="XAML -&gt; H"
+	Version="8.00"
+	>
+	<Rules>
+		<CustomBuildRule
+			Name="xaml 2 ruby"
+			CommandLine="ruby.exe  $(InputDir)\xaml2h.rb $(InputDir)\$(InputFileName) $(InputDir)"
+			Outputs="$(InputName).h"
+			FileExtensions="*.xaml"
+			>
+			<Properties>
+			</Properties>
+		</CustomBuildRule>
+	</Rules>
+</VisualStudioToolFile>

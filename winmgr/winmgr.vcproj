@@ -14,6 +14,9 @@
 		/>
 	</Platforms>
 	<ToolFiles>
+		<ToolFile
+			RelativePath="..\xaml2header.rules"
+		/>
 	</ToolFiles>
 	<Configurations>
 		<Configuration
@@ -29,6 +32,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="xaml 2 ruby"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -106,6 +112,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="xaml 2 ruby"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -221,6 +230,17 @@
 				>
 			</File>
 			<File
+				RelativePath=".\keynav.xaml"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="xaml 2 ruby"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\searchwin.xaml"
 				>
 				<FileConfiguration
@@ -228,7 +248,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="C:\ruby\bin\ruby.exe $(InputDir)\xaml2h.rb $(InputDir)\$(InputFileName) $(InputDir)&#x0D;&#x0A;"
+						CommandLine="ruby.exe  $(InputDir)\xaml2h.rb $(InputDir)\$(InputFileName) $(InputDir)&#x0D;&#x0A;"
 						Outputs="mainwindow.h"
 					/>
 				</FileConfiguration>
